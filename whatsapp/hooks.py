@@ -4,22 +4,21 @@ app_publisher = "Rono"
 app_description = "Waclient Integration for whatsapp support"
 app_email = "ronoelisha625@gmail.com"
 app_license = "mit"
+app_logo_url = "/assets/whatsapp/images/whatsapp-logo.svg"
 
 # Apps
 # ------------------
 
 # required_apps = []
 
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "whatsapp",
-# 		"logo": "/assets/whatsapp/logo.png",
-# 		"title": "Whatsapp",
-# 		"route": "/whatsapp",
-# 		"has_permission": "whatsapp.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "whatsapp",
+		"logo": "/assets/whatsapp/images/whatsapp-logo.svg",
+		"title": "WhatsApp",
+		"route": "/app/whatsapp",
+	}
+]
 
 # Includes in <head>
 # ------------------
@@ -85,8 +84,9 @@ app_license = "mit"
 # Installation
 # ------------
 
+after_install = "whatsapp.install.after_install"
+
 # before_install = "whatsapp.install.before_install"
-# after_install = "whatsapp.install.after_install"
 
 # Uninstallation
 # ------------
@@ -142,6 +142,12 @@ app_license = "mit"
 
 # Scheduled Tasks
 # ---------------
+
+scheduler_events = {
+	"daily": [
+		"whatsapp.whatsapp.doctype.whatsapp_chat_message.whatsapp_chat_message.delete_old_logs",
+	],
+}
 
 # scheduler_events = {
 # 	"all": [

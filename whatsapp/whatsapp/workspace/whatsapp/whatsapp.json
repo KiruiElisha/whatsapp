@@ -1,0 +1,138 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"wa_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>WhatsApp Support</b></span>\", \"col\": 12}}, {\"id\": \"wa_p1\", \"type\": \"paragraph\", \"data\": {\"text\": \"Automated replies, AI assisted support, and lead capture over WhatsApp.\", \"col\": 12}}, {\"id\": \"wa_sc_hdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"wa_sc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"WhatsApp Settings\", \"col\": 3}}, {\"id\": \"wa_sc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Auto Reply Rules\", \"col\": 3}}, {\"id\": \"wa_sc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Message Log\", \"col\": 3}}, {\"id\": \"wa_sc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Contacts\", \"col\": 3}}, {\"id\": \"wa_sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"wa_card1\", \"type\": \"card\", \"data\": {\"card_name\": \"Configuration\", \"col\": 4}}, {\"id\": \"wa_card2\", \"type\": \"card\", \"data\": {\"card_name\": \"Automation\", \"col\": 4}}, {\"id\": \"wa_card3\", \"type\": \"card\", \"data\": {\"card_name\": \"Conversations\", \"col\": 4}}]",
+ "creation": "2026-08-15 20:30:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "message",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "WhatsApp",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Configuration",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Settings",
+   "link_count": 0,
+   "link_to": "WhatsApp Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Template",
+   "link_count": 0,
+   "link_to": "WhatsApp Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Automation",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Auto Reply",
+   "link_count": 0,
+   "link_to": "WhatsApp Auto Reply",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Conversations",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Chat Message",
+   "link_count": 0,
+   "link_to": "WhatsApp Chat Message",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Contact",
+   "link_count": 0,
+   "link_to": "WhatsApp Contact",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-08-15 20:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "WhatsApp",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "WhatsApp Settings",
+   "link_to": "WhatsApp Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Auto Reply Rules",
+   "link_to": "WhatsApp Auto Reply",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Message Log",
+   "link_to": "WhatsApp Chat Message",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Contacts",
+   "link_to": "WhatsApp Contact",
+   "type": "DocType"
+  }
+ ],
+ "title": "WhatsApp"
+}

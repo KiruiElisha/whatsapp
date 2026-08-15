@@ -1,0 +1,279 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:wa_id",
+ "creation": "2026-08-15 20:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "wa_id",
+  "push_name",
+  "column_break_identity",
+  "contact_name",
+  "is_group",
+  "links_section",
+  "contact",
+  "column_break_links",
+  "reference_doctype",
+  "reference_name",
+  "conversation_section",
+  "conversation_state",
+  "state_expires_on",
+  "column_break_state",
+  "state_data",
+  "qualification_section",
+  "lead_status",
+  "lead_score",
+  "column_break_qualification",
+  "intent",
+  "needs_human",
+  "ai_summary",
+  "lead",
+  "activity_section",
+  "last_message_on",
+  "incoming_count",
+  "column_break_activity",
+  "outgoing_count",
+  "controls_section",
+  "opted_out",
+  "exclude_from_auto_reply",
+  "column_break_controls",
+  "blocked"
+ ],
+ "fields": [
+  {
+   "description": "WhatsApp identifier for this chat, normally the phone number in international format.",
+   "fieldname": "wa_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "WhatsApp ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Display name reported by WhatsApp.",
+   "fieldname": "push_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Push Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_identity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Name set by your team. Overrides the push name in reports.",
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Contact Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group Chat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "links_section",
+   "fieldtype": "Section Break",
+   "label": "Links"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "column_break_links",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optional link to whatever this chat is about, such as a Customer or Lead.",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_doctype"
+  },
+  {
+   "fieldname": "conversation_section",
+   "fieldtype": "Section Break",
+   "label": "Conversation"
+  },
+  {
+   "description": "Where this contact currently sits in an automated flow. Empty means no flow is active.",
+   "fieldname": "conversation_state",
+   "fieldtype": "Data",
+   "label": "Conversation State",
+   "read_only": 1
+  },
+  {
+   "description": "After this time the state is treated as empty and the flow restarts.",
+   "fieldname": "state_expires_on",
+   "fieldtype": "Datetime",
+   "label": "State Expires On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_state",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Values collected during the flow, as JSON.",
+   "fieldname": "state_data",
+   "fieldtype": "Code",
+   "label": "State Data",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qualification_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Qualification"
+  },
+  {
+   "default": "Unknown",
+   "description": "Set by the AI from the conversation. Change it by hand at any time.",
+   "fieldname": "lead_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lead Status",
+   "options": "Unknown\nProspect\nCasual\nSupport\nSpam\nCustomer"
+  },
+  {
+   "default": "0",
+   "description": "0 to 100 estimate of how likely this contact is to buy soon.",
+   "fieldname": "lead_score",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Lead Score"
+  },
+  {
+   "fieldname": "column_break_qualification",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "intent",
+   "fieldtype": "Data",
+   "label": "Intent",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "The AI could not handle the last message and asked for a person.",
+   "fieldname": "needs_human",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Needs Human"
+  },
+  {
+   "fieldname": "ai_summary",
+   "fieldtype": "Small Text",
+   "label": "AI Summary",
+   "read_only": 1
+  },
+  {
+   "description": "Created automatically once this contact is scored as a prospect.",
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Lead"
+  },
+  {
+   "fieldname": "activity_section",
+   "fieldtype": "Section Break",
+   "label": "Activity"
+  },
+  {
+   "fieldname": "last_message_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Last Message On",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "incoming_count",
+   "fieldtype": "Int",
+   "label": "Messages Received",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_activity",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "outgoing_count",
+   "fieldtype": "Int",
+   "label": "Messages Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "controls_section",
+   "fieldtype": "Section Break",
+   "label": "Controls"
+  },
+  {
+   "default": "0",
+   "description": "Contact asked to stop receiving automated messages. Auto replies are skipped.",
+   "fieldname": "opted_out",
+   "fieldtype": "Check",
+   "label": "Opted Out"
+  },
+  {
+   "default": "0",
+   "description": "Never send this contact an automated reply, but keep logging their messages.",
+   "fieldname": "exclude_from_auto_reply",
+   "fieldtype": "Check",
+   "label": "Exclude From Auto Reply"
+  },
+  {
+   "fieldname": "column_break_controls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Ignore this contact entirely. Nothing is sent to them, automated or manual.",
+   "fieldname": "blocked",
+   "fieldtype": "Check",
+   "label": "Blocked"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-15 20:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "WhatsApp Contact",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "contact_name"
+}

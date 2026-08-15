@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:template_name",
+ "creation": "2026-08-15 20:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "enabled",
+  "column_break_head",
+  "description",
+  "message_section",
+  "message",
+  "media_section",
+  "media_url",
+  "column_break_media",
+  "media_filename",
+  "help_section",
+  "placeholder_help"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_head",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "message_section",
+   "fieldtype": "Section Break",
+   "label": "Message"
+  },
+  {
+   "description": "Supports Jinja, for example Hello {{ contact_name }}.",
+   "fieldname": "message",
+   "fieldtype": "Text",
+   "label": "Message",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "media_section",
+   "fieldtype": "Section Break",
+   "label": "Attachment"
+  },
+  {
+   "description": "Public URL of a file to attach. Leave blank for a plain text message.",
+   "fieldname": "media_url",
+   "fieldtype": "Data",
+   "label": "Media URL"
+  },
+  {
+   "fieldname": "column_break_media",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "File name shown to the recipient, including the extension.",
+   "fieldname": "media_filename",
+   "fieldtype": "Data",
+   "label": "Media File Name"
+  },
+  {
+   "fieldname": "help_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "placeholder_help",
+   "fieldtype": "HTML",
+   "label": "Placeholders",
+   "options": "<p class=\"text-muted small\">Available placeholders: <code>{{ contact_name }}</code>, <code>{{ push_name }}</code>, <code>{{ wa_id }}</code>, <code>{{ message }}</code> (the text the contact sent), and <code>{{ doc }}</code> when a reference document is supplied.</p>"
+ }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-15 20:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "WhatsApp Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

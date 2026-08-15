@@ -1,0 +1,591 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-08-15 20:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "connection_tab",
+  "enabled",
+  "column_break_conn",
+  "api_base_url",
+  "instance_api_base_url",
+  "request_timeout",
+  "accounts_section",
+  "accounts",
+  "numbers_section",
+  "default_country_code",
+  "column_break_numbers",
+  "assume_local_numbers",
+  "webhook_tab",
+  "webhook_enabled",
+  "public_base_url",
+  "webhook_endpoint",
+  "column_break_webhook",
+  "verify_webhook_token",
+  "webhook_token",
+  "webhook_help_section",
+  "webhook_help",
+  "support_tab",
+  "auto_reply_enabled",
+  "column_break_support",
+  "reply_to_groups",
+  "session_timeout_minutes",
+  "excluded_section",
+  "excluded_help",
+  "excluded_numbers",
+  "fallback_section",
+  "send_fallback_reply",
+  "fallback_reply",
+  "business_hours_section",
+  "restrict_business_hours",
+  "working_days",
+  "column_break_hours",
+  "business_hours_start",
+  "business_hours_end",
+  "outside_hours_reply",
+  "ai_tab",
+  "ai_enabled",
+  "ai_reply_when_no_rule_matches",
+  "column_break_ai_toggle",
+  "ai_provider",
+  "ai_model",
+  "ai_credentials_section",
+  "ai_api_key",
+  "column_break_ai_creds",
+  "ai_api_base_url",
+  "ai_business_section",
+  "business_context",
+  "ai_tone_section",
+  "ai_system_prompt",
+  "ai_tuning_section",
+  "ai_history_limit",
+  "ai_temperature",
+  "column_break_ai_tuning",
+  "ai_max_output_tokens",
+  "ai_max_reply_characters",
+  "qualification_section",
+  "ai_qualify_leads",
+  "ai_prospect_threshold",
+  "column_break_qualification",
+  "ai_escalate_to_human",
+  "ai_handoff_message",
+  "lead_section",
+  "create_lead_for_prospects",
+  "lead_owner",
+  "column_break_lead",
+  "lead_utm_source",
+  "lead_help",
+  "logging_tab",
+  "log_incoming",
+  "log_outgoing",
+  "column_break_logging",
+  "store_raw_payload",
+  "log_retention_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "connection_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connection"
+  },
+  {
+   "default": "0",
+   "description": "Master switch. When off, no messages are sent or auto-replied.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enable WhatsApp Integration"
+  },
+  {
+   "fieldname": "column_break_conn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "https://waclient.com/api",
+   "description": "Host that handles sending. WaClient serves /send from here.",
+   "fieldname": "api_base_url",
+   "fieldtype": "Data",
+   "label": "Send API Base URL",
+   "reqd": 1
+  },
+  {
+   "default": "https://api.waclient.com",
+   "description": "Host that handles instance management: status, info, and webhook registration. WaClient serves these from a different domain to sending.",
+   "fieldname": "instance_api_base_url",
+   "fieldtype": "Data",
+   "label": "Instance API Base URL",
+   "reqd": 1
+  },
+  {
+   "default": "30",
+   "description": "Seconds to wait for the API before giving up.",
+   "fieldname": "request_timeout",
+   "fieldtype": "Int",
+   "label": "Request Timeout (seconds)"
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "description": "Each row is a connected WhatsApp number (a WaClient instance). Mark one as default.",
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "WhatsApp Accounts",
+   "options": "WhatsApp Account"
+  },
+  {
+   "fieldname": "numbers_section",
+   "fieldtype": "Section Break",
+   "label": "Phone Number Handling"
+  },
+  {
+   "description": "Dialling code used for local numbers, digits only (for example 254 for Kenya).",
+   "fieldname": "default_country_code",
+   "fieldtype": "Data",
+   "label": "Default Country Code"
+  },
+  {
+   "fieldname": "column_break_numbers",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Treat numbers starting with 0, or shorter than 10 digits, as local and prefix them with the default country code.",
+   "fieldname": "assume_local_numbers",
+   "fieldtype": "Check",
+   "label": "Normalise Local Numbers"
+  },
+  {
+   "fieldname": "webhook_tab",
+   "fieldtype": "Tab Break",
+   "label": "Webhook"
+  },
+  {
+   "default": "0",
+   "description": "Accept inbound messages and delivery receipts from WaClient.",
+   "fieldname": "webhook_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Incoming Webhook"
+  },
+  {
+   "description": "Public HTTPS base URL of this site, e.g. https://erp.example.com or a tunnel URL. Leave blank to auto-detect. Set this when the site is behind a proxy or tunnel, because auto-detection returns a local address when the webhook is registered from the console.",
+   "fieldname": "public_base_url",
+   "fieldtype": "Data",
+   "label": "Public Base URL"
+  },
+  {
+   "description": "Register this URL with WaClient. Use the button above to do it automatically.",
+   "fieldname": "webhook_endpoint",
+   "fieldtype": "Data",
+   "label": "Webhook Endpoint",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_webhook",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Reject webhook calls that do not present the token below. Recommended.",
+   "fieldname": "verify_webhook_token",
+   "fieldtype": "Check",
+   "label": "Verify Webhook Token"
+  },
+  {
+   "depends_on": "eval:doc.verify_webhook_token",
+   "description": "Shared secret sent as the token query parameter or the X-Webhook-Token header.",
+   "fieldname": "webhook_token",
+   "fieldtype": "Password",
+   "label": "Webhook Token",
+   "mandatory_depends_on": "eval:doc.verify_webhook_token"
+  },
+  {
+   "fieldname": "webhook_help_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "webhook_help",
+   "fieldtype": "HTML",
+   "label": "Webhook Help",
+   "options": "<p class=\"text-muted small\">WaClient posts every inbound message and status update to the endpoint above. Auto replies only run for inbound messages received through this webhook.</p>"
+  },
+  {
+   "fieldname": "support_tab",
+   "fieldtype": "Tab Break",
+   "label": "Support & Auto Reply"
+  },
+  {
+   "default": "0",
+   "description": "Run the WhatsApp Auto Reply rules against every inbound message.",
+   "fieldname": "auto_reply_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Automated Replies"
+  },
+  {
+   "fieldname": "column_break_support",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Off by default so the bot stays quiet in group chats.",
+   "fieldname": "reply_to_groups",
+   "fieldtype": "Check",
+   "label": "Reply in Group Chats"
+  },
+  {
+   "default": "30",
+   "description": "How long a contact stays in a conversation step before the flow resets.",
+   "fieldname": "session_timeout_minutes",
+   "fieldtype": "Int",
+   "label": "Conversation Timeout (minutes)"
+  },
+  {
+   "fieldname": "excluded_section",
+   "fieldtype": "Section Break",
+   "label": "Never Auto Reply To"
+  },
+  {
+   "fieldname": "excluded_help",
+   "fieldtype": "HTML",
+   "label": "Excluded Help",
+   "options": "<p class=\"text-muted small\">Messages from these numbers are still logged, but no rule, fallback, or AI reply is ever sent to them. Use this for family, colleagues, and anyone else you message from this number personally.</p>"
+  },
+  {
+   "fieldname": "excluded_numbers",
+   "fieldtype": "Table",
+   "label": "Excluded Numbers",
+   "options": "WhatsApp Excluded Number"
+  },
+  {
+   "fieldname": "fallback_section",
+   "fieldtype": "Section Break",
+   "label": "Fallback"
+  },
+  {
+   "default": "0",
+   "description": "Send a catch-all reply when no rule matches the message.",
+   "fieldname": "send_fallback_reply",
+   "fieldtype": "Check",
+   "label": "Send Fallback Reply"
+  },
+  {
+   "depends_on": "eval:doc.send_fallback_reply",
+   "fieldname": "fallback_reply",
+   "fieldtype": "Small Text",
+   "label": "Fallback Reply",
+   "mandatory_depends_on": "eval:doc.send_fallback_reply"
+  },
+  {
+   "fieldname": "business_hours_section",
+   "fieldtype": "Section Break",
+   "label": "Business Hours"
+  },
+  {
+   "default": "0",
+   "description": "Outside these hours, rules marked Business Hours Only are skipped and the message below is sent instead.",
+   "fieldname": "restrict_business_hours",
+   "fieldtype": "Check",
+   "label": "Restrict to Business Hours"
+  },
+  {
+   "default": "Mon,Tue,Wed,Thu,Fri",
+   "depends_on": "eval:doc.restrict_business_hours",
+   "description": "Comma separated three letter days, for example Mon,Tue,Wed,Thu,Fri.",
+   "fieldname": "working_days",
+   "fieldtype": "Data",
+   "label": "Working Days"
+  },
+  {
+   "fieldname": "column_break_hours",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "08:00:00",
+   "depends_on": "eval:doc.restrict_business_hours",
+   "fieldname": "business_hours_start",
+   "fieldtype": "Time",
+   "label": "Opens At"
+  },
+  {
+   "default": "17:00:00",
+   "depends_on": "eval:doc.restrict_business_hours",
+   "fieldname": "business_hours_end",
+   "fieldtype": "Time",
+   "label": "Closes At"
+  },
+  {
+   "depends_on": "eval:doc.restrict_business_hours",
+   "fieldname": "outside_hours_reply",
+   "fieldtype": "Small Text",
+   "label": "Outside Hours Reply"
+  },
+  {
+   "fieldname": "ai_tab",
+   "fieldtype": "Tab Break",
+   "label": "AI Assistant"
+  },
+  {
+   "default": "0",
+   "description": "Let an AI model write replies using the business context below.",
+   "fieldname": "ai_enabled",
+   "fieldtype": "Check",
+   "label": "Enable AI Replies"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.ai_enabled",
+   "description": "Hand the message to the AI when no keyword rule matches. Turn this off to use AI only from rules with reply type AI.",
+   "fieldname": "ai_reply_when_no_rule_matches",
+   "fieldtype": "Check",
+   "label": "Use AI When No Rule Matches"
+  },
+  {
+   "fieldname": "column_break_ai_toggle",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Google Gemini",
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_provider",
+   "fieldtype": "Select",
+   "label": "AI Provider",
+   "options": "Google Gemini\nOpenAI\nAnthropic Claude"
+  },
+  {
+   "default": "gemini-2.5-flash",
+   "depends_on": "eval:doc.ai_enabled",
+   "description": "For example gemini-2.5-flash, gpt-4o-mini, or claude-sonnet-5.",
+   "fieldname": "ai_model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_credentials_section",
+   "fieldtype": "Section Break",
+   "label": "Credentials"
+  },
+  {
+   "fieldname": "ai_api_key",
+   "fieldtype": "Password",
+   "label": "API Key",
+   "mandatory_depends_on": "eval:doc.ai_enabled"
+  },
+  {
+   "fieldname": "column_break_ai_creds",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Leave blank to use the provider default. Set this only for a proxy or a self-hosted gateway.",
+   "fieldname": "ai_api_base_url",
+   "fieldtype": "Data",
+   "label": "API Base URL Override"
+  },
+  {
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_business_section",
+   "fieldtype": "Section Break",
+   "label": "Business Context"
+  },
+  {
+   "description": "The single most important setting for reply quality. Describe what you sell, your prices, hours, location, delivery terms, and anything the AI must never promise. The AI answers only from this.",
+   "fieldname": "business_context",
+   "fieldtype": "Text",
+   "label": "What the AI Should Know",
+   "mandatory_depends_on": "eval:doc.ai_enabled"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_tone_section",
+   "fieldtype": "Section Break",
+   "label": "Instructions"
+  },
+  {
+   "description": "Extra instructions on tone and behaviour, added to the built-in prompt. Leave blank for the default.",
+   "fieldname": "ai_system_prompt",
+   "fieldtype": "Text",
+   "label": "Additional Instructions"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_tuning_section",
+   "fieldtype": "Section Break",
+   "label": "Tuning"
+  },
+  {
+   "default": "10",
+   "description": "How many earlier messages from this chat to send as context. Higher means better continuity and a larger bill.",
+   "fieldname": "ai_history_limit",
+   "fieldtype": "Int",
+   "label": "Conversation History Depth"
+  },
+  {
+   "default": "0.4",
+   "description": "Lower is more consistent and factual. 0.2 to 0.5 suits support.",
+   "fieldname": "ai_temperature",
+   "fieldtype": "Float",
+   "label": "Temperature",
+   "precision": "2"
+  },
+  {
+   "fieldname": "column_break_ai_tuning",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "600",
+   "fieldname": "ai_max_output_tokens",
+   "fieldtype": "Int",
+   "label": "Max Output Tokens"
+  },
+  {
+   "default": "900",
+   "description": "Replies longer than this are trimmed. WhatsApp messages should stay short.",
+   "fieldname": "ai_max_reply_characters",
+   "fieldtype": "Int",
+   "label": "Max Reply Characters"
+  },
+  {
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "qualification_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Qualification"
+  },
+  {
+   "default": "1",
+   "description": "Ask the AI to judge whether each conversation is a real buying enquiry or just casual chat, and record it on the contact.",
+   "fieldname": "ai_qualify_leads",
+   "fieldtype": "Check",
+   "label": "Qualify Leads"
+  },
+  {
+   "default": "60",
+   "depends_on": "eval:doc.ai_qualify_leads",
+   "description": "Contacts scoring at or above this are marked as a Prospect. 0 to 100.",
+   "fieldname": "ai_prospect_threshold",
+   "fieldtype": "Int",
+   "label": "Prospect Score Threshold"
+  },
+  {
+   "fieldname": "column_break_qualification",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.ai_qualify_leads",
+   "description": "When the AI decides it cannot help, flag the contact for a human and send the handoff message.",
+   "fieldname": "ai_escalate_to_human",
+   "fieldtype": "Check",
+   "label": "Escalate to a Human"
+  },
+  {
+   "default": "Let me get a colleague to help with this — someone will reply shortly.",
+   "depends_on": "eval:doc.ai_escalate_to_human",
+   "fieldname": "ai_handoff_message",
+   "fieldtype": "Small Text",
+   "label": "Handoff Message"
+  },
+  {
+   "depends_on": "eval:doc.ai_qualify_leads",
+   "fieldname": "lead_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Capture"
+  },
+  {
+   "default": "0",
+   "description": "Create a Lead the first time the AI scores a contact above the prospect threshold. Later messages update that same Lead rather than creating another.",
+   "fieldname": "create_lead_for_prospects",
+   "fieldtype": "Check",
+   "label": "Create a Lead for Prospects"
+  },
+  {
+   "depends_on": "eval:doc.create_lead_for_prospects",
+   "description": "Who the new Lead is assigned to. Leave blank to use the system default.",
+   "fieldname": "lead_owner",
+   "fieldtype": "Link",
+   "label": "Lead Owner",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_lead",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.create_lead_for_prospects",
+   "description": "Stamped on the Lead so WhatsApp enquiries can be reported on separately.",
+   "fieldname": "lead_utm_source",
+   "fieldtype": "Link",
+   "label": "Lead Source",
+   "options": "UTM Source"
+  },
+  {
+   "fieldname": "lead_help",
+   "fieldtype": "HTML",
+   "label": "Lead Help",
+   "options": "<p class=\"text-muted small\">Requires ERPNext. The contact's WhatsApp number becomes the Lead's mobile number, and the AI summary is added as a note, so nothing is lost when a human picks the conversation up.</p>"
+  },
+  {
+   "fieldname": "logging_tab",
+   "fieldtype": "Tab Break",
+   "label": "Logging"
+  },
+  {
+   "default": "1",
+   "description": "Store every inbound message as a WhatsApp Chat Message record.",
+   "fieldname": "log_incoming",
+   "fieldtype": "Check",
+   "label": "Log Incoming Messages"
+  },
+  {
+   "default": "1",
+   "description": "Store every outbound message, including automated replies.",
+   "fieldname": "log_outgoing",
+   "fieldtype": "Check",
+   "label": "Log Outgoing Messages"
+  },
+  {
+   "fieldname": "column_break_logging",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Keep the full webhook JSON on each message. Useful while setting up, noisy afterwards.",
+   "fieldname": "store_raw_payload",
+   "fieldtype": "Check",
+   "label": "Store Raw Payload"
+  },
+  {
+   "default": "90",
+   "description": "Message logs older than this are deleted daily. Set to 0 to keep them forever.",
+   "fieldname": "log_retention_days",
+   "fieldtype": "Int",
+   "label": "Delete Logs After (days)"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-15 20:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "WhatsApp Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
