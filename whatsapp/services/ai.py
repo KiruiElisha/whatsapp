@@ -13,6 +13,11 @@ import requests
 import frappe
 from frappe import _
 
+from whatsapp.whatsapp.doctype.whatsapp_ai_correction.whatsapp_ai_correction import (
+	get_active,
+	record_applied,
+)
+
 LEAD_STATUSES = ("Prospect", "Casual", "Support", "Spam")
 
 BASE_PROMPT = """You are a WhatsApp assistant replying on behalf of a business.
@@ -65,7 +70,9 @@ def is_configured(settings) -> bool:
 	)
 
 
-def generate(contact, message: str, settings, history: list | None = None) -> dict | None:
+def generate(
+	contact, message: str, settings, history: list | None = None, account: str | None = None
+) -> dict | None:
 	"""Ask the model for a reply plus a lead judgement.
 
 	Returns the parsed payload, or None if AI is not usable.
@@ -73,7 +80,8 @@ def generate(contact, message: str, settings, history: list | None = None) -> di
 	if not is_configured(settings):
 		return None
 
-	system = build_system_prompt(settings)
+	corrections = get_corrections(settings, account)
+	system = build_system_prompt(settings, corrections)
 	conversation = build_conversation(contact, message, history, settings)
 
 	provider = settings.ai_provider or "Google Gemini"
@@ -91,20 +99,61 @@ def generate(contact, message: str, settings, history: list | None = None) -> di
 	except requests.RequestException as exc:
 		raise AIError(_("Could not reach the {0} API: {1}").format(provider, exc)) from exc
 
-	return normalise(parse_json(raw), settings)
+	result = normalise(parse_json(raw), settings)
+
+	if corrections:
+		record_applied([c["name"] for c in corrections])
+
+	return result
 
 
-def build_system_prompt(settings) -> str:
+def get_corrections(settings, account: str | None) -> list[dict]:
+	"""Lessons from replies that went wrong before. Never blocks a reply."""
+	if not settings.ai_use_corrections:
+		return []
+
+	try:
+		return get_active(account, settings.ai_correction_limit or 20)
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "WhatsApp AI corrections lookup failed")
+		return []
+
+
+def build_system_prompt(settings, corrections: list[dict] | None = None) -> str:
 	parts = [BASE_PROMPT, "\n--- BUSINESS CONTEXT ---\n" + (settings.business_context or "").strip()]
 
 	extra = (settings.ai_system_prompt or "").strip()
 	if extra:
 		parts.append("\n--- ADDITIONAL INSTRUCTIONS ---\n" + extra)
 
+	if corrections:
+		parts.append(format_corrections(corrections))
+
 	limit = settings.ai_max_reply_characters or 900
 	parts.append(f"\nKeep the reply under {limit} characters.")
 
 	return "\n".join(parts)
+
+
+def format_corrections(corrections: list[dict]) -> str:
+	"""Render past mistakes as explicit do-not-repeat instructions.
+
+	Placed last in the prompt, and stated as overriding, because these are
+	corrections to behaviour the earlier sections produced.
+	"""
+	lines = [
+		"\n--- CORRECTIONS FROM PAST MISTAKES ---",
+		"You made these mistakes in real conversations. Each one overrides the general "
+		"rules and the business context above. Do not repeat them.",
+	]
+
+	for i, c in enumerate(corrections, 1):
+		lines.append(f"\n{i}. When: {c['applies_when']}")
+		if c.get("wrong_reply"):
+			lines.append(f"   You wrongly said: {c['wrong_reply']}")
+		lines.append(f"   Do this instead: {c['correct_behaviour']}")
+
+	return "\n".join(lines)
 
 
 def build_conversation(contact, message: str, history: list | None, settings) -> list[dict]:

@@ -59,6 +59,10 @@
   "business_context",
   "ai_tone_section",
   "ai_system_prompt",
+  "ai_corrections_section",
+  "ai_use_corrections",
+  "column_break_corrections",
+  "ai_correction_limit",
   "ai_tuning_section",
   "ai_history_limit",
   "ai_temperature",
@@ -409,6 +413,31 @@
    "fieldname": "ai_system_prompt",
    "fieldtype": "Text",
    "label": "Additional Instructions"
+  },
+  {
+   "depends_on": "eval:doc.ai_enabled",
+   "fieldname": "ai_corrections_section",
+   "fieldtype": "Section Break",
+   "label": "Learning From Mistakes"
+  },
+  {
+   "default": "1",
+   "description": "Feed recorded corrections into every AI reply so past mistakes are not repeated. Manage them in the WhatsApp AI Correction list.",
+   "fieldname": "ai_use_corrections",
+   "fieldtype": "Check",
+   "label": "Apply Recorded Corrections"
+  },
+  {
+   "fieldname": "column_break_corrections",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "20",
+   "depends_on": "eval:doc.ai_use_corrections",
+   "description": "How many corrections to include at most. The lowest priority numbers win when there are more than this. Each one costs tokens on every reply.",
+   "fieldname": "ai_correction_limit",
+   "fieldtype": "Int",
+   "label": "Maximum Corrections Per Reply"
   },
   {
    "collapsible": 1,

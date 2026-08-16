@@ -1,0 +1,176 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-08-16 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 0,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "title",
+  "enabled",
+  "column_break_head",
+  "priority",
+  "account",
+  "lesson_section",
+  "applies_when",
+  "wrong_reply",
+  "column_break_lesson",
+  "correct_behaviour",
+  "evidence_section",
+  "source_message",
+  "column_break_evidence",
+  "contact",
+  "usage_section",
+  "times_applied",
+  "column_break_usage",
+  "last_applied_on"
+ ],
+ "fields": [
+  {
+   "default": "WA-FIX-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "WA-FIX-.#####"
+  },
+  {
+   "description": "Short name for this lesson, for example \"Never quote a delivery date\".",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "Disable to stop feeding this lesson to the AI without deleting the record.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_head",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "10",
+   "description": "Lower numbers are sent to the AI first, so they survive when the limit trims the list.",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Priority"
+  },
+  {
+   "description": "Only apply this lesson to messages on this account. Leave blank to apply to all accounts.",
+   "fieldname": "account",
+   "fieldtype": "Data",
+   "label": "Restrict to Account"
+  },
+  {
+   "fieldname": "lesson_section",
+   "fieldtype": "Section Break",
+   "label": "The Lesson"
+  },
+  {
+   "description": "The situation this applies to, for example \"a customer asks when their order will arrive\".",
+   "fieldname": "applies_when",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Applies When",
+   "reqd": 1
+  },
+  {
+   "description": "What the AI actually said that was wrong. Optional, but it makes the lesson much clearer to the model.",
+   "fieldname": "wrong_reply",
+   "fieldtype": "Small Text",
+   "label": "What It Got Wrong"
+  },
+  {
+   "fieldname": "column_break_lesson",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "What it should do or say instead. Be specific and concrete.",
+   "fieldname": "correct_behaviour",
+   "fieldtype": "Small Text",
+   "label": "What It Should Do Instead",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "evidence_section",
+   "fieldtype": "Section Break",
+   "label": "Where This Happened"
+  },
+  {
+   "fieldname": "source_message",
+   "fieldtype": "Link",
+   "label": "Source Message",
+   "options": "WhatsApp Chat Message"
+  },
+  {
+   "fieldname": "column_break_evidence",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "WhatsApp Contact"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "usage_section",
+   "fieldtype": "Section Break",
+   "label": "Usage"
+  },
+  {
+   "default": "0",
+   "description": "How many times this lesson has been included in an AI prompt.",
+   "fieldname": "times_applied",
+   "fieldtype": "Int",
+   "label": "Times Applied",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_usage",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_applied_on",
+   "fieldtype": "Datetime",
+   "label": "Last Applied On",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-16 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Whatsapp",
+ "name": "WhatsApp AI Correction",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "priority",
+ "sort_order": "ASC",
+ "states": [],
+ "title_field": "title"
+}

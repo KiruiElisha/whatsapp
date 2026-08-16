@@ -222,7 +222,9 @@ def send_ai_reply(
 ) -> dict | None:
 	"""Ask the AI for a reply, record what it concluded, and send it."""
 	try:
-		result = ai.generate(contact, context["message"], settings)
+		result = ai.generate(
+			contact, context["message"], settings, account=context.get("account")
+		)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "WhatsApp AI reply failed")
 		return None
