@@ -227,8 +227,23 @@ class WhatsAppSettings(Document):
 			if token:
 				url = f"{url}?token={token}"
 
-		result = WaClient().set_webhook(url)
-		return {"webhook_url": url, "response": result}
+		client = WaClient()
+		result = client.set_webhook(url)
+
+		# "Webhook URI Saved" does not mean the hook is live, so read it back.
+		registered = {}
+		try:
+			registered = client.get_instance_info().get("data", {}).get("webhook") or {}
+		except Exception:
+			pass
+
+		return {
+			"webhook_url": url,
+			"response": result,
+			"registered_url": registered.get("webhook_url"),
+			"registered_enabled": bool(registered.get("enabled")),
+			"verified": registered.get("webhook_url") == url and bool(registered.get("enabled")),
+		}
 
 	@frappe.whitelist()
 	def test_connection(self, account: str | None = None) -> dict:

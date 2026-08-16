@@ -44,16 +44,32 @@ frappe.ui.form.on("WhatsApp Settings", {
 				freeze: true,
 				freeze_message: __("Registering webhook..."),
 			}).then((r) => {
-				if (!r.exc) {
-					frm.reload_doc();
+				if (r.exc) return;
+				const d = r.message;
+				frm.reload_doc();
+
+				if (d.verified) {
 					frappe.msgprint({
 						title: __("Webhook Registered"),
 						indicator: "green",
 						message: __("WaClient will now deliver messages to {0}", [
-							frappe.utils.escape_html(r.message.webhook_url),
+							frappe.utils.escape_html(d.webhook_url),
 						]),
 					});
+					return;
 				}
+
+				frappe.msgprint({
+					title: __("Webhook Not Active"),
+					indicator: "red",
+					message: __(
+						"WaClient accepted the request but the webhook is not live. It reports URL {0} and enabled {1}.",
+						[
+							frappe.utils.escape_html(d.registered_url || "—"),
+							d.registered_enabled ? __("Yes") : __("No"),
+						]
+					),
+				});
 			});
 		});
 

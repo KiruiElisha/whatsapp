@@ -42,19 +42,27 @@ class WaClient:
 		payload: dict | None = None,
 		method: str = "POST",
 		base: str | None = None,
+		encode: str = "json",
 	) -> dict:
+		"""Call WaClient.
+
+		`encode` picks the POST body format. /send reads JSON, but the instance
+		endpoints only read form-encoded fields and reject a JSON body with
+		"<field> is required", so they must pass encode="form".
+		"""
 		url = f"{(base or self.base_url).rstrip('/')}/{path.lstrip('/')}"
 		data = {**(payload or {}), **self.credentials()}
 
 		headers = {
 			"Accept": "application/json",
-			"Content-Type": "application/json",
 			"User-Agent": "Frappe-WhatsApp/1.0",
 		}
 
 		try:
 			if method.upper() == "GET":
 				response = requests.get(url, params=data, headers=headers, timeout=self.timeout)
+			elif encode == "form":
+				response = requests.post(url, data=data, headers=headers, timeout=self.timeout)
 			else:
 				response = requests.post(url, json=data, headers=headers, timeout=self.timeout)
 		except requests.RequestException as exc:
@@ -113,9 +121,12 @@ class WaClient:
 	def set_webhook(self, webhook_url: str, enable: bool = True) -> dict:
 		return self.request(
 			"set_webhook",
-			{"webhook_url": webhook_url, "enable": bool(enable)},
+			# Must be the literal string "true"/"false". WaClient accepts 1/0 and
+			# answers "Webhook URI Saved", but silently leaves the hook disabled.
+			{"webhook_url": webhook_url, "enable": "true" if enable else "false"},
 			method="POST",
 			base=self.instance_url,
+			encode="form",
 		)
 
 	def get_status(self, live: bool = True) -> dict:
