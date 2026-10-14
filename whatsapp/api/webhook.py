@@ -94,6 +94,13 @@ def verify_token(settings) -> bool:
 	if signed is not None:
 		return signed
 
+	from whatsapp.api.client import NERGAA, provider_of
+
+	if provider_of(settings) == NERGAA:
+		# Nergaa WhatsApp always signs; until this site has its webhook secret (Link Phone or Register
+		# Webhook), nothing unsigned is let in: it could be anyone posting fake customer messages.
+		return False
+
 	if not settings.verify_webhook_token:
 		return True
 

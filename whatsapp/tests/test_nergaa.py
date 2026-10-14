@@ -332,3 +332,33 @@ class TestWebhook(NergaaCase):
 	def test_disconnect_is_recorded(self):
 		self.deliver({"event": "logged_out", "session": self.slug, "instance_id": "i", "at": "x"})
 		self.assertEqual(self.settings().accounts[0].connection_state, "logged_out")
+
+
+class TestUnsignedRefused(NergaaCase):
+	def test_no_secret_yet_means_nothing_unsigned_gets_in(self):
+		from werkzeug.test import EnvironBuilder
+		from werkzeug.wrappers import Request
+
+		settings = self.settings()
+		settings.webhook_enabled = 1
+		settings.save()
+		frappe.clear_document_cache("WhatsApp Settings", "WhatsApp Settings")
+		body = json.dumps(
+			flat(
+				"message",
+				message={
+					"message_id": "FAKE",
+					"chat_id": "254700000009@s.whatsapp.net",
+					"text": "hi",
+					"timestamp": 1,
+				},
+			)
+		).encode()
+		frappe.local.request = Request(EnvironBuilder(method="POST", data=body).get_environ())
+		frappe.local.response = frappe._dict()
+		frappe.local.form_dict = frappe._dict()
+		try:
+			self.assertEqual(webhook.receive()["status"], "unauthorised")
+		finally:
+			del frappe.local.request
+		self.assertFalse(frappe.db.exists("WhatsApp Chat Message", {"message_id": "FAKE"}))

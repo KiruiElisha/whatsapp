@@ -78,7 +78,8 @@ whatsapp.link_phone = function (frm, preset) {
 				<p class="text-muted small">${__("Waiting for the phone...")}</p></div>`);
 			return;
 		}
-		if (s.qr && String(s.qr).startsWith("data:image/")) {
+		// only a real image data URL goes into the page (never markup from the gateway)
+		if (s.qr && /^data:image\/(png|jpeg|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(String(s.qr))) {
 			show(`<div class="text-center">
 				<p>${__("On the phone: WhatsApp → Linked devices → Link a device, and scan:")}</p>
 				<img src="${s.qr}" style="width: 280px; max-width: 100%; image-rendering: pixelated" alt="QR">

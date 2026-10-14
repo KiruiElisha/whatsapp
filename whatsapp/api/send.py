@@ -11,7 +11,8 @@ from whatsapp.services import messaging
 
 
 def check_permission() -> None:
-	if not frappe.has_permission("WhatsApp Chat Message", "read"):
+	# Sending speaks for the company to anyone: reading the message log isn't enough.
+	if not frappe.has_permission("WhatsApp Chat Message", "create"):
 		frappe.throw(_("You are not permitted to send WhatsApp messages."), frappe.PermissionError)
 
 
