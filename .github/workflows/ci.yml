@@ -4,10 +4,11 @@ on:
   push:
     branches:
       - main
+      - "claude/**"
   pull_request:
 
 concurrency:
-  group: main-whatsapp-${{ github.event.number }}
+  group: whatsapp-${{ github.event.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -76,14 +77,14 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install MariaDB Client
-        run: |
-          sudo apt update
-          sudo apt-get install mariadb-client
+        run: command -v mariadb >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq mariadb-client)
 
       - name: Setup
         run: |
           pip install frappe-bench
-          bench init --skip-redis-config-generation --skip-assets --python "$(which python)" ~/frappe-bench
+          # version-16: the app's Frappe (pyproject); develop moves under the tests
+          bench init --skip-redis-config-generation --skip-assets --frappe-branch version-16 \
+            --python "$(which python)" ~/frappe-bench
 
       - name: Install
         working-directory: /home/runner/frappe-bench
@@ -92,7 +93,6 @@ jobs:
           bench setup requirements --dev
           bench new-site --db-root-password root --admin-password admin test_site
           bench --site test_site install-app whatsapp
-          bench build
         env:
           CI: 'Yes'
 
