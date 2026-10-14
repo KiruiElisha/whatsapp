@@ -1,5 +1,142 @@
+// Linking a phone to Nergaa WhatsApp: show the QR (or pairing code) the gateway
+// hands back, and poll until the phone connects.
+frappe.provide("whatsapp");
+whatsapp.link_phone = function (frm, preset) {
+	const accounts = (frm.doc.accounts || []).map((r) => r.account_name).filter(Boolean);
+	const d = new frappe.ui.Dialog({
+		title: __("Link a WhatsApp Phone"),
+		fields: [
+			{
+				fieldname: "account",
+				fieldtype: "Data",
+				label: __("Account Name"),
+				reqd: 1,
+				default: preset || accounts[0] || "Main",
+				description: __("A label for this number, e.g. Sales or Support. A new name adds a number."),
+			},
+			{
+				fieldname: "method",
+				fieldtype: "Select",
+				label: __("How to link"),
+				options: [
+					{ value: "qr", label: __("Scan a QR code") },
+					{ value: "code", label: __("Type a pairing code on the phone") },
+				],
+				default: "qr",
+			},
+			{
+				fieldname: "phone",
+				fieldtype: "Data",
+				label: __("Phone Number"),
+				depends_on: "eval:doc.method=='code'",
+				description: __("International format, e.g. 254712345678"),
+			},
+			{ fieldname: "out", fieldtype: "HTML" },
+		],
+		primary_action_label: __("Start"),
+		primary_action(values) {
+			if (values.method === "code" && !values.phone) {
+				frappe.msgprint(__("Enter the phone number to get a pairing code."));
+				return;
+			}
+			show(`<p class="text-muted">${__("Contacting Nergaa WhatsApp...")}</p>`);
+			frappe
+				.call({
+					method: "whatsapp.api.link.start",
+					args: { account: values.account, phone: values.method === "code" ? values.phone : null },
+				})
+				.then((r) => {
+					if (!r.exc) {
+						render(r.message);
+						poll(values.account);
+					}
+				});
+		},
+		on_hide() {
+			clearInterval(d.timer);
+			frm.reload_doc();
+		},
+	});
+
+	const esc = (v) => frappe.utils.escape_html(String(v || ""));
+	const show = (html) => d.fields_dict.out.$wrapper.html(html);
+
+	function render(s) {
+		if (s.connected) {
+			clearInterval(d.timer);
+			show(`<div class="text-center" style="padding: 20px">
+				<h4 class="text-success">${__("Linked")}</h4>
+				<p>${__("{0} is connected as {1}.", [esc(s.account), esc(s.phone || s.name || "")])}</p>
+				<p class="text-muted small">${__("Messages to this number now reach ERPNext.")}</p></div>`);
+			d.set_primary_action(__("Done"), () => d.hide());
+			return;
+		}
+		if (s.pairing_code) {
+			show(`<div class="text-center" style="padding: 12px">
+				<p>${__("On the phone: WhatsApp → Linked devices → Link a device → Link with phone number instead, then type:")}</p>
+				<div style="font-size: 2em; letter-spacing: .25em; font-family: monospace; margin: 12px 0">${esc(s.pairing_code)}</div>
+				<p class="text-muted small">${__("Waiting for the phone...")}</p></div>`);
+			return;
+		}
+		if (s.qr && String(s.qr).startsWith("data:image/")) {
+			show(`<div class="text-center">
+				<p>${__("On the phone: WhatsApp → Linked devices → Link a device, and scan:")}</p>
+				<img src="${s.qr}" style="width: 280px; max-width: 100%; image-rendering: pixelated" alt="QR">
+				<p class="text-muted small">${__("The code refreshes by itself. Waiting for the phone...")}</p></div>`);
+			return;
+		}
+		show(`<p class="text-muted">${__("State: {0}. Waiting for a code...", [esc(s.state)])}</p>
+			${s.error ? `<p class="text-danger small">${esc(s.error)}</p>` : ""}`);
+	}
+
+	function poll(account) {
+		clearInterval(d.timer);
+		let rounds = 0;
+		d.timer = setInterval(() => {
+			// About four minutes; WhatsApp stops rotating codes well before then.
+			if (++rounds > 80) {
+				clearInterval(d.timer);
+				show(`<p class="text-warning">${__("Timed out. Press Start to try again.")}</p>`);
+				return;
+			}
+			frappe
+				.call({ method: "whatsapp.api.link.status", args: { account }, type: "GET" })
+				.then((r) => !r.exc && render(r.message));
+		}, 3000);
+	}
+
+	d.show();
+};
+
 frappe.ui.form.on("WhatsApp Settings", {
 	refresh(frm) {
+		if (frm.doc.provider !== "WaClient") {
+			frm.add_custom_button(__("Link Phone"), () => whatsapp.link_phone(frm));
+			frm.add_custom_button(
+				__("Unlink Phone"),
+				() => {
+					const names = (frm.doc.accounts || []).map((r) => r.account_name);
+					frappe.prompt(
+						{ fieldname: "account", fieldtype: "Select", label: __("Account"), options: names, reqd: 1 },
+						(v) =>
+							frappe.confirm(__("Log {0} out of WhatsApp on the gateway?", [v.account]), () =>
+								frappe
+									.call({ method: "whatsapp.api.link.unlink", args: { account: v.account }, freeze: true })
+									.then((r) => !r.exc && frm.reload_doc())
+							),
+						__("Unlink Phone")
+					);
+				},
+				__("Phones")
+			);
+			if (!(frm.doc.accounts || []).some((r) => r.instance_id)) {
+				frm.dashboard.set_headline_alert(
+					__("No phone linked yet. Use Link Phone to connect a WhatsApp number by QR code or pairing code."),
+					"blue"
+				);
+			}
+		}
+
 		frm.add_custom_button(__("Test Connection"), () => {
 			frm.call({
 				doc: frm.doc,
@@ -29,7 +166,7 @@ frappe.ui.form.on("WhatsApp Settings", {
 						${
 							d.relogin_required
 								? `<p class="text-danger">${__(
-										"This instance needs to be linked again by scanning the QR code in your WaClient dashboard."
+										"This number needs to be linked again. Use Link Phone (Nergaa WhatsApp) or scan the QR code in your WaClient dashboard."
 								  )}</p>`
 								: ""
 						}`,
@@ -52,7 +189,7 @@ frappe.ui.form.on("WhatsApp Settings", {
 					frappe.msgprint({
 						title: __("Webhook Registered"),
 						indicator: "green",
-						message: __("WaClient will now deliver messages to {0}", [
+						message: __("WhatsApp will now deliver messages to {0}", [
 							frappe.utils.escape_html(d.webhook_url),
 						]),
 					});
@@ -63,7 +200,7 @@ frappe.ui.form.on("WhatsApp Settings", {
 					title: __("Webhook Not Active"),
 					indicator: "red",
 					message: __(
-						"WaClient accepted the request but the webhook is not live. It reports URL {0} and enabled {1}.",
+						"The provider accepted the request but the webhook is not live. It reports URL {0} and enabled {1}.",
 						[
 							frappe.utils.escape_html(d.registered_url || "—"),
 							d.registered_enabled ? __("Yes") : __("No"),

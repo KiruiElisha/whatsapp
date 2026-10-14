@@ -146,8 +146,11 @@ class WaClient:
 def extract_message_id(response: dict) -> str | None:
 	"""Pull the provider message key out of a send response.
 
-	WaClient has shipped the payload under both `data` and `message`, so check both.
+	WaClient has shipped the payload under both `data` and `message`, so check both;
+	Nergaa WhatsApp answers with a flat `message_id`.
 	"""
+	if isinstance(response.get("message_id"), str):
+		return response["message_id"]
 	for key in ("data", "message"):
 		block = response.get(key)
 		if isinstance(block, dict):
@@ -155,3 +158,27 @@ def extract_message_id(response: dict) -> str | None:
 			if message_id:
 				return message_id
 	return None
+
+
+NERGAA = "Nergaa WhatsApp"
+WACLIENT = "WaClient"
+
+
+def provider_of(settings) -> str:
+	"""The provider in use. Older installs predate the field and were all WaClient,
+	unless the site was handed a Nergaa key (Nergaa Cloud does that)."""
+	if settings.get("provider"):
+		return settings.provider
+	from whatsapp.api import nergaa
+
+	return NERGAA if nergaa.is_configured(settings) else WACLIENT
+
+
+def get_client(account_name: str | None = None, settings=None):
+	"""A sending client for the configured provider."""
+	settings = settings or frappe.get_cached_doc("WhatsApp Settings")
+	if provider_of(settings) == NERGAA:
+		from whatsapp.api.nergaa import NergaaClient
+
+		return NergaaClient(account_name, settings=settings)
+	return WaClient(account_name, settings=settings)

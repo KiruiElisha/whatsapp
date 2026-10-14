@@ -2,6 +2,20 @@
 
 Waclient Integration for whatsapp support
 
+### Providers
+
+- **Nergaa WhatsApp** ([whatsapp.nergaa.cloud](https://whatsapp.nergaa.cloud)): link phones from ERPNext itself.
+  WhatsApp Settings → **Link Phone** shows a QR code to scan (WhatsApp → Linked devices → Link a device),
+  or a pairing code to type when you enter the phone number. Several numbers can be linked, one per
+  WhatsApp Account row. Incoming messages arrive on a signed webhook (`X-Webhook-Signature`,
+  HMAC-SHA256) that Link Phone registers for you, and delivery receipts update the message log.
+  The API key goes in Settings, or in site config (`nergaa_whatsapp_api_key`, optional
+  `nergaa_whatsapp_url`) — sites on Nergaa Cloud get it automatically.
+- **WaClient**: enter the instance ID and access token for each account, then Register Webhook.
+
+Any printable document gets **Send on WhatsApp** in its menu: the number and a message are filled in
+from the document, and with Nergaa WhatsApp the print PDF is attached.
+
 ### Installation
 
 You can install this app using the [bench](https://github.com/frappe/bench) CLI:

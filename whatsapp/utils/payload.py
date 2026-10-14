@@ -41,9 +41,48 @@ def first_entry(value):
 	return value
 
 
+def is_flat(payload: dict) -> bool:
+	"""Nergaa WhatsApp's envelope: {event, session, instance_id, ..., at}."""
+	payload = as_dict(payload)
+	return bool(payload.get("event")) and "session" in payload and "at" in payload
+
+
+def parse_flat(payload: dict) -> dict | None:
+	"""A Nergaa WhatsApp `message` event, already flat, in our shape."""
+	message = as_dict(payload.get("message"))
+	if not message:
+		return None
+
+	chat_id = message.get("chat_id") or ""
+	media = as_dict(message.get("media"))
+	message_type = message.get("message_type") or media.get("type") or "text"
+	text = message.get("text") or ""
+	if not text and message_type == "location" and media:
+		text = f"{media.get('latitude')}, {media.get('longitude')}"
+
+	return {
+		"event": payload.get("event"),
+		"instance_id": payload.get("session") or payload.get("instance_id"),
+		"chat_id": strip_suffix(chat_id),
+		# Like the WaClient path: a group's messages belong to the group contact.
+		"wa_id": strip_suffix(chat_id) if chat_id and not chat_id.endswith("@lid") else str(message.get("wa_id") or ""),
+		"is_group": bool(message.get("is_group")) or is_group_id(chat_id),
+		"from_me": bool(message.get("from_me")),
+		"message_id": message.get("message_id"),
+		"push_name": message.get("push_name"),
+		"message": text,
+		"message_type": message_type,
+		"media_url": media.get("url"),
+		"media_filename": media.get("filename"),
+		"timestamp": extract_timestamp({"messageTimestamp": message.get("timestamp")}, {}),
+	}
+
+
 def parse_webhook(payload: dict) -> dict | None:
 	"""Return a normalised message dict, or None if the payload has no message."""
 	payload = as_dict(payload)
+	if is_flat(payload):
+		return parse_flat(payload)
 	body = as_dict(payload.get("data")) or payload
 
 	event = body.get("event") or payload.get("event") or ""

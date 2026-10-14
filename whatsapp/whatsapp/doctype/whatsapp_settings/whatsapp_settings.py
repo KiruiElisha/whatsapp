@@ -176,8 +176,17 @@ class WhatsAppSettings(Document):
 		else:
 			row = next((r for r in candidates if r.is_default), candidates[0])
 
-		token = row.get_password("access_token", raise_exception=False)
-		if not token or not row.instance_id:
+		from whatsapp.api.client import NERGAA, provider_of
+
+		token = row.get_password("access_token", raise_exception=False) if row.access_token else None
+		if provider_of(self) == NERGAA:
+			if not row.instance_id:
+				frappe.throw(
+					_("WhatsApp account {0} has no phone linked yet. Use Link Phone in WhatsApp Settings.").format(
+						row.account_name
+					)
+				)
+		elif not token or not row.instance_id:
 			frappe.throw(_("WhatsApp account {0} is missing an instance ID or access token.").format(row.account_name))
 
 		return {
@@ -212,8 +221,13 @@ class WhatsAppSettings(Document):
 
 	@frappe.whitelist()
 	def register_webhook(self) -> dict:
-		"""Tell WaClient where to deliver inbound messages."""
-		from whatsapp.api.client import WaClient
+		"""Tell the provider where to deliver inbound messages."""
+		from whatsapp.api.client import NERGAA, WaClient, provider_of
+
+		if provider_of(self) == NERGAA:
+			self.webhook_enabled = 1
+			self.save()
+			return self.register_nergaa_webhook()
 
 		if not self.webhook_enabled:
 			frappe.throw(_("Enable the incoming webhook before registering it."))
@@ -245,10 +259,49 @@ class WhatsAppSettings(Document):
 			"verified": registered.get("webhook_url") == url and bool(registered.get("enabled")),
 		}
 
+	def register_nergaa_webhook(self) -> dict:
+		"""One signed, account-wide webhook on Nergaa WhatsApp for this site.
+
+		The gateway generates the secret and returns it once; it is kept here to
+		check X-Webhook-Signature on every delivery. Re-registering replaces the
+		previous hook rather than adding a second one.
+		"""
+		from whatsapp.api.nergaa import NergaaAPI
+
+		url = self.webhook_endpoint
+		self.validate_webhook_reachable(url)
+		api = NergaaAPI(self)
+
+		previous = self.nergaa_webhook_id
+		stale = [h for h in api.webhooks() if h.get("url") == url or h.get("id") == previous]
+		hook = api.create_webhook(url, name=frappe.local.site)
+		for old in stale:
+			if old.get("id") and old["id"] != hook.get("id"):
+				try:
+					api.delete_webhook(old["id"])
+				except Exception:
+					frappe.log_error(frappe.get_traceback(), "Nergaa WhatsApp: removing old webhook failed")
+
+		self.db_set("nergaa_webhook_id", hook.get("id"))
+		self.db_set("nergaa_webhook_secret", hook.get("secret"))
+		self.db_set("webhook_enabled", 1)
+		frappe.clear_document_cache("WhatsApp Settings", "WhatsApp Settings")
+
+		return {
+			"webhook_url": url,
+			"response": {k: v for k, v in hook.items() if k != "secret"},
+			"registered_url": hook.get("url"),
+			"registered_enabled": bool(hook.get("enabled", True)),
+			"verified": hook.get("url") == url and bool(hook.get("secret")),
+		}
+
 	@frappe.whitelist()
 	def test_connection(self, account: str | None = None) -> dict:
-		"""Check that WaClient accepts the credentials and the phone is linked."""
-		from whatsapp.api.client import WaClient
+		"""Check that the provider accepts the credentials and the phone is linked."""
+		from whatsapp.api.client import NERGAA, WaClient, provider_of
+
+		if provider_of(self) == NERGAA:
+			return self.test_nergaa(account)
 
 		client = WaClient(account)
 		status = client.get_status().get("data") or {}
@@ -270,6 +323,28 @@ class WhatsAppSettings(Document):
 			"phone": (info.get("account") or {}).get("phone"),
 			"webhook_url": (info.get("webhook") or {}).get("webhook_url"),
 			"webhook_enabled": (info.get("webhook") or {}).get("enabled"),
+		}
+
+	def test_nergaa(self, account: str | None = None) -> dict:
+		from whatsapp.api.nergaa import NergaaAPI, NergaaClient
+
+		me = NergaaAPI(self).me()
+		client = NergaaClient(account, settings=self)
+		status = client.get_status()
+		state = status.get("state") or "unknown"
+		usage = me.get("usage") or {}
+
+		return {
+			"account": client.account_name,
+			"gateway_account": (me.get("account") or {}).get("name"),
+			"usage": usage,
+			"connection_state": state,
+			"connected": state == "connected",
+			"relogin_required": state in ("logged_out", "disconnected"),
+			"phone": status.get("phone"),
+			"webhook_url": self.webhook_endpoint if self.nergaa_webhook_id else None,
+			"webhook_enabled": bool(self.nergaa_webhook_id),
+			"provider": "Nergaa WhatsApp",
 		}
 
 	@frappe.whitelist()

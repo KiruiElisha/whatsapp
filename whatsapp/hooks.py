@@ -86,6 +86,12 @@ add_to_apps_screen = [
 
 after_install = "whatsapp.install.after_install"
 
+app_include_js = "/assets/whatsapp/js/whatsapp_send.js"
+
+boot_session = "whatsapp.boot.boot_session"
+
+after_migrate = "whatsapp.install.after_migrate"
+
 # before_install = "whatsapp.install.before_install"
 
 # Uninstallation

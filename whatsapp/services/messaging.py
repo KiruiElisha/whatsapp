@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import now_datetime
 
-from whatsapp.api.client import WaClient, extract_message_id
+from whatsapp.api.client import NERGAA, extract_message_id, get_client, provider_of
 from whatsapp.utils.phone import is_group_id, normalize
 from whatsapp.whatsapp.doctype.whatsapp_contact.whatsapp_contact import (
 	get_or_create,
@@ -25,8 +25,13 @@ def send_message(
 	reference_name: str | None = None,
 	in_reply_to: str | None = None,
 	matched_rule: str | None = None,
+	media_base64: str | None = None,
+	media_mimetype: str | None = None,
 ) -> dict:
 	"""Send a WhatsApp message and record it.
+
+	`media_base64` sends file bytes (a print PDF, say) instead of a URL; only
+	Nergaa WhatsApp accepts that.
 
 	Returns the created WhatsApp Chat Message name alongside the provider response.
 	"""
@@ -34,8 +39,11 @@ def send_message(
 	if not settings.enabled:
 		frappe.throw(_("WhatsApp integration is disabled in WhatsApp Settings."))
 
-	if not (message or media_url):
+	if not (message or media_url or media_base64):
 		frappe.throw(_("Provide a message, a media URL, or both."))
+
+	if media_base64 and provider_of(settings) != NERGAA:
+		frappe.throw(_("Sending files from ERPNext needs the Nergaa WhatsApp provider."))
 
 	number = normalize(to, country_code=country_code, settings=settings)
 	contact = get_or_create(number, is_group=is_group_id(to))
@@ -43,7 +51,8 @@ def send_message(
 	if contact.blocked:
 		frappe.throw(_("{0} is blocked in WhatsApp Contact, so nothing was sent.").format(number))
 
-	client = WaClient(account, settings=settings)
+	client = get_client(account, settings=settings)
+	has_media = bool(media_url or media_base64)
 
 	log = None
 	if settings.log_outgoing:
@@ -58,7 +67,7 @@ def send_message(
 				"to_number": number,
 				"chat_id": number,
 				"is_group": contact.is_group,
-				"message_type": "media" if media_url else "text",
+				"message_type": "media" if has_media else "text",
 				"message": message,
 				"media_url": media_url,
 				"media_filename": media_filename,
@@ -72,7 +81,11 @@ def send_message(
 		log.insert(ignore_permissions=True)
 
 	try:
-		if media_url:
+		if media_base64:
+			response = client.send_media(
+				number, message or "", filename=media_filename, base64=media_base64, mimetype=media_mimetype
+			)
+		elif media_url:
 			response = client.send_media(number, message or "", media_url, media_filename)
 		else:
 			response = client.send_text(number, message)

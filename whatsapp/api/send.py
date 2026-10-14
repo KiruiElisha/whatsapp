@@ -86,3 +86,88 @@ def send_template(
 		reference_doctype=reference_doctype,
 		reference_name=reference_name,
 	)
+
+
+# Fields that commonly hold a party's mobile number, most specific first.
+PHONE_FIELDS = (
+	"whatsapp_no",
+	"mobile_no",
+	"contact_mobile",
+	"contact_phone",
+	"phone",
+	"phone_no",
+	"cell_number",
+)
+
+
+@frappe.whitelist()
+def document_defaults(doctype: str, name: str) -> dict:
+	"""Prefill the Send on WhatsApp dialog: a number from the document and a message."""
+	check_permission()
+	doc = frappe.get_doc(doctype, name)
+	doc.check_permission("read")
+
+	number = next((doc.get(f) for f in PHONE_FIELDS if doc.get(f)), None)
+	party = (
+		doc.get("customer_name")
+		or doc.get("supplier_name")
+		or doc.get("party_name")
+		or doc.get("contact_display")
+	)
+
+	greeting = _("Dear {0},").format(party) if party else _("Hello,")
+	title = _(doctype)
+	message = _("{0} please find attached {1} {2}.").format(greeting, title, name)
+	if doc.get("grand_total") and doc.get("currency"):
+		message += " " + _("Amount: {0}.").format(
+			frappe.format_value(doc.grand_total, {"fieldtype": "Currency", "options": doc.currency}, doc)
+		)
+
+	from whatsapp.api.client import NERGAA, provider_of
+
+	settings = frappe.get_cached_doc("WhatsApp Settings")
+	return {
+		"to": number,
+		"message": message,
+		"can_attach": provider_of(settings) == NERGAA,
+		"print_format": frappe.get_meta(doctype).default_print_format or "Standard",
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def send_document(
+	doctype: str,
+	name: str,
+	to: str,
+	message: str | None = None,
+	attach_pdf: int | str = 1,
+	print_format: str | None = None,
+	account: str | None = None,
+) -> dict:
+	"""Send a document on WhatsApp, with its print PDF attached."""
+	import base64
+
+	check_permission()
+	doc = frappe.get_doc(doctype, name)
+	doc.check_permission("print" if frappe.utils.cint(attach_pdf) else "read")
+
+	kwargs = {
+		"to": to,
+		"message": message,
+		"account": account,
+		"reference_doctype": doctype,
+		"reference_name": name,
+	}
+
+	if frappe.utils.cint(attach_pdf):
+		pdf = frappe.get_print(doctype, name, print_format=print_format or None, doc=doc, as_pdf=True)
+		safe = "".join(c if c.isalnum() or c in "-_." else "-" for c in name)
+		kwargs.update(
+			media_base64=base64.b64encode(pdf).decode(),
+			media_filename=f"{safe}.pdf",
+			media_mimetype="application/pdf",
+		)
+
+	result = messaging.send_message(**kwargs)
+	doc.add_comment("Info", _("Sent on WhatsApp to {0}").format(result.get("to")))
+	return result

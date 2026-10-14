@@ -68,7 +68,25 @@ SAMPLE_RULES = [
 
 def after_install() -> None:
 	create_sample_rules()
+	use_nergaa_from_site_config()
 	frappe.db.commit()
+
+
+def after_migrate() -> None:
+	use_nergaa_from_site_config()
+
+
+def use_nergaa_from_site_config() -> None:
+	"""On Nergaa Cloud the site config carries a Nergaa WhatsApp key: use it.
+
+	Only fills in a provider that was never chosen, so a site set up for
+	WaClient keeps WaClient.
+	"""
+	if not frappe.conf.get("nergaa_whatsapp_api_key"):
+		return
+	if frappe.db.get_single_value("WhatsApp Settings", "provider"):
+		return
+	frappe.db.set_single_value("WhatsApp Settings", "provider", "Nergaa WhatsApp")
 
 
 def create_sample_rules() -> None:
