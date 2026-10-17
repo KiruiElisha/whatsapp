@@ -101,6 +101,23 @@ PHONE_FIELDS = (
 )
 
 
+def first_number(record) -> str | None:
+	return next((record.get(f) for f in PHONE_FIELDS if record.get(f)), None)
+
+
+def document_number(doc) -> str | None:
+	"""The document's own number, else its contact person's, else its customer's or supplier's."""
+	number = first_number(doc)
+	if not number and doc.get("contact_person"):
+		number = first_number(frappe.get_doc("Contact", doc.contact_person))
+	party_type = doc.get("party_type") or doc.get("quotation_to") or ("Customer" if doc.get("customer") else
+		"Supplier" if doc.get("supplier") else None)
+	party = doc.get("party") or doc.get("party_name") or doc.get("customer") or doc.get("supplier")
+	if not number and party_type in ("Customer", "Supplier") and party:
+		number = first_number(frappe.get_doc(party_type, party))
+	return number
+
+
 @frappe.whitelist()
 def document_defaults(doctype: str, name: str) -> dict:
 	"""Prefill the Send on WhatsApp dialog: a number from the document and a message."""
@@ -108,7 +125,7 @@ def document_defaults(doctype: str, name: str) -> dict:
 	doc = frappe.get_doc(doctype, name)
 	doc.check_permission("read")
 
-	number = next((doc.get(f) for f in PHONE_FIELDS if doc.get(f)), None)
+	number = document_number(doc)
 	party = (
 		doc.get("customer_name")
 		or doc.get("supplier_name")

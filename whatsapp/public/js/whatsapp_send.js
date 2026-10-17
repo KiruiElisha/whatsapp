@@ -47,6 +47,6 @@
 		if (!frappe.boot.whatsapp_enabled || !frm || frm.is_new() || SKIP.has(frm.doctype)) return;
 		if (frm.meta.issingle || frm.meta.istable) return;
 		if (!frappe.model.can_print(frm.doctype, frm) && !frm.meta.is_submittable) return;
-		frm.page.add_menu_item(__("Send on WhatsApp"), () => send(frm), true);
+		frm.add_custom_button(__("Send on WhatsApp"), () => send(frm));
 	});
 })();

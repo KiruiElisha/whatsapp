@@ -362,3 +362,18 @@ class TestUnsignedRefused(NergaaCase):
 		finally:
 			del frappe.local.request
 		self.assertFalse(frappe.db.exists("WhatsApp Chat Message", {"message_id": "FAKE"}))
+
+
+class TestDocumentNumber(TestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def test_number_falls_back_to_the_contact_person_when_the_document_has_none(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "Jane", "mobile_no": "0712345678"}).insert()
+		doc = frappe._dict(contact_person=contact.name)
+		self.assertEqual(send.document_number(doc), "0712345678")
+
+	def test_the_documents_own_number_wins_over_its_contact_person(self):
+		contact = frappe.get_doc({"doctype": "Contact", "first_name": "Jane", "mobile_no": "0712345678"}).insert()
+		doc = frappe._dict(contact_mobile="0799999999", contact_person=contact.name)
+		self.assertEqual(send.document_number(doc), "0799999999")
